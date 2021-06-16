@@ -5,7 +5,9 @@ from dash.dependencies import Input, Output, State
 import plotly.graph_objects as go
 import plotly.express as px
 
+
 import pandas as pd
+from inspect import getmembers, isclass
 
 from layouts.app_layout import App_Layout
 from gui_utils.parse_datafile import read_datafile
@@ -34,18 +36,33 @@ def plot_raw_data(data):
     return fig
 
 
-@Peak_fit_dashboard.callback(Output('Model-fit-plot', 'figure'), Output('Residuals-plot', 'figure'), Input('data-import', 'contents'))  
-def plot_model_fit(data):
+def model_selection(model_str):
+    from models import fit_profiles
+    profiles = getmembers(fit_profiles, isclass)
+    
+    for i in range(len(profiles)):
+        
+        if profiles[i][0] == model_str:
+            model = profiles[i][1]()
+
+    return model
+
+
+@Peak_fit_dashboard.callback(Output('Model-fit-plot', 'figure'), Output('Residuals-plot', 'figure'), 
+                            Input('data-import', 'contents'), Input('Model-selection', 'value'))  
+def plot_model_fit(data, model_str):
 
     datafile = read_datafile(data)
 
     try: 
         df = pd.read_csv(datafile, sep = ';', names = ['x', 'y'])
-    
-        model = poly2()
-        model.fit(df['x'], df['y'])
+        
+        model = model_selection(model_str)
 
+        model.fit(df['x'], df['y'])
+        
         fig_model = px.scatter(df, x = 'x', y = 'y')
+        
         fig_model.add_scatter(x = df['x'], y = model.predict(df['x']), mode='lines')
 
         df['residuals'] = df['y'] - model.predict(df['x'])

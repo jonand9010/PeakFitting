@@ -1,8 +1,18 @@
 import numpy as np
 
-def Linear():
-    pass
+class Linear:
+    def __init__(self):
+        self.param = [0, 0]
 
+    def fit(self, x, y):
+        
+        self.param = np.polyfit(x, y, deg = 1)
+
+    def predict(self, x):
+        
+        y_hat = np.polyval(self.param, x)
+
+        return y_hat
 
 class poly2:
     def __init__(self):
@@ -18,13 +28,13 @@ class poly2:
 
         return y_hat
 
-def Gaussian():
+class Gaussian:
     pass
 
 
-def Lorentz():
+class Lorentz:
     pass
 
 
-def Voigt():
+class Voigt:
     pass
