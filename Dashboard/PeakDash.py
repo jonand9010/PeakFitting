@@ -41,7 +41,7 @@ def model_selection(model_str):
     profiles = getmembers(fit_profiles, isclass)
     
     for i in range(len(profiles)):
-        
+   
         if profiles[i][0] == model_str:
             model = profiles[i][1]()
 
