@@ -11,7 +11,7 @@ from inspect import getmembers, isclass
 
 from layouts.app_layout import App_Layout
 from gui_utils.parse_datafile import read_datafile
-from models.fit_profiles import poly2
+
 
 
 
