@@ -37,7 +37,7 @@ def App_Layout():
             
         ], style = {'width': '90%'}),
 
-        html.Button('Clear table', id = 'clear_button',  n_clicks=0)
+        html.Button('Clear results', id = 'clear_button',  n_clicks=0)
 
         ])
 

@@ -19,6 +19,7 @@ external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 Peak_fit_dashboard = dash.Dash(__name__, external_stylesheets = external_stylesheets)
 
 Peak_fit_dashboard.layout = App_Layout()
+
 Table_fitresults = Table()
 
 @Peak_fit_dashboard.callback(Output('Raw-data-plot', 'figure'), Input('data-import', 'contents'))
@@ -37,21 +38,24 @@ def plot_raw_data(data):
     return fig
 
 
-@Peak_fit_dashboard.callback(Output('Model-fit-plot', 'figure'), Output('Residuals-plot', 'figure'), Output('Fit-Results', 'data'),
-                            Output('Fit-Results', 'columns'), [Input('data-import', 'contents'), Input('Model-selection', 'value'), 
-                            Input('Raw-data-plot', 'relayoutData')] ) 
-def plot_model_fit(data, model_str, relayout_data, *figures):
+@Peak_fit_dashboard.callback([Output('Model-fit-plot', 'figure'), Output('Residuals-plot', 'figure'), Output('Fit-Results', 'data'),
+                            Output('Fit-Results', 'columns'), Output('clear_button', 'n_clicks')],  [Input('data-import', 'contents'), 
+                            Input('Model-selection', 'value'), Input('clear_button', 'n_clicks'), Input('Raw-data-plot', 'relayoutData')] ) 
+def plot_model_fit(data, model_str, n_clicks, relayout_data, *figures):
+
 
     datafile = read_datafile(data)
 
+
     try: 
+
         df = pd.read_csv(datafile, sep = ';', names = ['x', 'y'])
         
         model = model_selection(model_str)
         
         model.fit(df['x'], df['y'])    
-
-        Table_fitresults.update_table(model.parameters)
+ 
+        Table_fitresults.update_table(model.parameters, model_str)
 
         fig_model = px.scatter(df, x = 'x', y = 'y')
         
@@ -61,10 +65,12 @@ def plot_model_fit(data, model_str, relayout_data, *figures):
         df['residuals'] = df['y'] - model.predict(df['x'])
         fig_residuals = px.scatter(df, x = 'x', y = df['residuals'])
 
+
     except:
 
         fig_model = go.Figure()
         fig_residuals = go.Figure()
+        
 
     for fig in [fig_model, fig_residuals]:
         try:
@@ -73,16 +79,11 @@ def plot_model_fit(data, model_str, relayout_data, *figures):
         except (KeyError, TypeError):
             fig['layout']["xaxis"]["autorange"] = True
 
-
-    return fig_model, fig_residuals, Table_fitresults.data, Table_fitresults.columns
-
-
-@Peak_fit_dashboard.callback(Output('clear_button', 'n_clicks'), Input('clear_button', 'n_clicks'))
-def update_output(n_clicks):
-    if n_clicks > 0:
-        Table_fitresults = Table()
+    if (n_clicks > 0) :
+        Table_fitresults.__init__()
         n_clicks = 0
-    return n_clicks
-    
+
+
+    return fig_model, fig_residuals, Table_fitresults.data, Table_fitresults.columns, n_clicks
 
 if __name__ == '__main__': Peak_fit_dashboard.run_server(debug=True)

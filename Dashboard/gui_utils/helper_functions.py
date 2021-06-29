@@ -28,7 +28,7 @@ def model_options():
 
 
 def model_selection(model_str):
-    from models import fit_profiles
+
     profiles = getmembers(fit_profiles, isclass)
     
     for i in range(len(profiles)):
@@ -45,11 +45,18 @@ class Table:
         self.data = []
         self.columns = []
 
-    def update_table(self, fitted_parameters):
+    def update_table(self, fitted_parameters, model):
 
         n_parameters = len(fitted_parameters)
-
+        
         if len(self.columns) < n_parameters:
-            self.columns = [{'id': "Parameter " + str(i+1), 'name': "Parameter " + str(i+1)} for i in range(n_parameters)]
+            columns = []
+            columns.append({'id': 'Model', 'name': "Model"})
+            for i in range(n_parameters):
+                columns.append({'id': "Parameter " + str(i+1), 'name': "Parameter " + str(i+1)})
+            
+            self.columns.append(columns)
+            self.columns = self.columns[0]
 
         self.data.append({"Parameter " + str(i+1): np.around(fitted_parameters[i], 2) for i in range(n_parameters)})
+        self.data[-1].update({'Model': model})
